@@ -1,0 +1,24 @@
+/* 1) Enlarge every starter button (whose id begins with “starter-”) */
+button[id^="starter-"] {
+    font-size: small !important;
+    /* bump up from text-sm */
+    padding: 0.75rem 1.5rem !important;
+    /* override px-4 py-2 */
+    height: auto !important;
+    /* drop the fixed h-10 */
+}
+
+/* 2) Stack icon below label & center them */
+button[id^="starter-"]>div {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+/* 3) Enlarge the image inside every starter button */
+button[id^="starter-"] img {
+    width: 4rem !important;
+    /* override h-5 w-5 */
+    height: 4rem !important;
+}
