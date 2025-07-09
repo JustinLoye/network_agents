@@ -122,14 +122,15 @@ async def on_message(msg: cl.Message):
                 )
             )
 
-    final_answer.content = remove_thoughts(final_answer.content)
-    final_answer.content = remove_tool(final_answer.content)
+    # final_answer.content = remove_thoughts(final_answer.content)
+    # final_answer.content = remove_tool(final_answer.content)
 
     final_answer.actions = actions
 
     # Get final_state to update the message history...
     final_state = graph.get_state(config=config).values
     message_history.append(final_state["messages"][-1])
+    final_answer.content = final_state["messages"][-1].content
 
     # ... and display it on the side for monitoring
     json_element = cl.CustomElement(
@@ -146,7 +147,7 @@ async def on_message(msg: cl.Message):
 
     await asyncio.sleep(3)
 
-    await final_answer.send(content=final_state["messages"][-1])
+    await final_answer.send()
 
 
 @cl.on_chat_end
