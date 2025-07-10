@@ -75,7 +75,9 @@ def get_iyp_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph
         response = llm.invoke(
             [
                 SystemMessage(sysprompt),
-                HumanMessage(state["user_query"] + "\n" + str(state["cypher_result"])),
+                HumanMessage("\n".join([state["user_query"],
+                                        str(state["cypher_query"]),
+                                        str(state["cypher_result"])]))
             ]
         )
         return {"messages": [response], "thoughts": [response]}
@@ -106,7 +108,7 @@ if __name__ == "__main__":
 
 
     # user_msg = "Return everything that is related with 8.8.8.0/24"
-    user_msg = "Find the IXPs' names where the AS with asn 2497 is present"
+    user_msg = "Find the Japanese IXPs' names where the AS with asn 2497 is present"
     # user_msg = "Find the QUERIED_FROM's value for the DomainName with name 'google.com' and the Country with country_code 'US'"
     # user_msg = "Return the names and asn of the AS peering with rrc25"
     # user_msg = "Find the AS nodes associated with the country code 'JP' through the COUNTRY relationship. Match these AS nodes to Ranking nodes with a rank below 10 according to the 'ihr.country_dependency' reference_name and for the Ranking in Japan."

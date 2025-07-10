@@ -54,7 +54,7 @@ async def set_starters():
         # ),
         cl.Starter(
             label="AS2497 IXP membership",
-            message="Get me the list of IXPs where Internet Initiative Japan AS2497 is present",
+            message="Get me the list of IXPs where AS2497 is present",
             icon="/public/knowledge-graph-data.svg",
         ),
         cl.Starter(

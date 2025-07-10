@@ -1,4 +1,3 @@
-from collections import defaultdict
 import re
 from langchain_core.example_selectors.base import BaseExampleSelector
 import random
@@ -24,7 +23,7 @@ def get_cypher_labels(cypher: str) -> list[str]:
 
 
 def create_entity_prompt(examples: dict):
-    example_prompt = PromptTemplate.from_template("user: {user}\n assistant: {assistant}")
+    example_prompt = PromptTemplate.from_template("user: {user}\nassistant: {assistant}")
     
     prefix = f"""You are a helpful assistant that extract or guess Internet entities from user messages.
 
@@ -94,8 +93,6 @@ class CypherEvalExampleSelector(BaseExampleSelector):
         return len(set(entities) & set(get_cypher_labels(cypher)))
 
     def add_example(self, example: dict) -> None:
-        # If you need to collect examples dynamically, do it here.
-        # Otherwise, just a no-op to satisfy the abstract base class:
         pass
 
     def select_examples(self, input_variables: dict):
@@ -130,19 +127,18 @@ class CypherEvalExampleSelector(BaseExampleSelector):
         ]
 
 
-example_selector = CypherEvalExampleSelector(cyphereval)
-example_selector.select_examples(input_variables={"entities": ["AS", "IXP"], "topK": 5})
-
-
-# Configure a formatter
-example_prompt = PromptTemplate(
-    input_variables=["question", "query"],
-    template="Question: {question}\nCypher query: {query}",
-)
-
-
 def create_cypher_template(schema: Neo4jSchema, entities: list[str]):
     """Few shot with dymanically loaded examples"""
+    
+    example_selector = CypherEvalExampleSelector(cyphereval)
+    example_selector.select_examples(input_variables={"entities": entities, "topK": 5})
+
+
+    # # Configure a formatter
+    example_prompt = PromptTemplate(
+        input_variables=["question", "query"],
+        template="Question: {question}\nCypher query: {query}",
+    )
 
     prefix = f"""Task:Generate Cypher statement to query a graph database about the Internet.
 Instructions:
@@ -173,11 +169,11 @@ Examples: Here are a few examples of generated Cypher statements for some questi
 
 def create_presenter_prompt(examples: dict, entities: list[str]):
     example_prompt = PromptTemplate.from_template(
-        "user: {user}\n assistant: {assistant}"
+        "user: {user}\nassistant: {assistant}"
     )
     
     prefix = f"""You are a helpful assistant that present the results of a Cypher query to the user.
-The user will provide his query in natural language and the result, and your role is to present it in a clear and professional way.
+The user will provide his query in natural language, the cypher query and the result, and your role is to present it in a clear and professional way.
 Cypher queries are made to a neo4j knowledge graph called Internet Yellow Pages (IYP). 
 IYP is a knowledge database that gathers information about Internet resources (for example ASNs, IP prefixes, and domain names).
 
@@ -206,20 +202,21 @@ if __name__ == "__main__":
     schema = Neo4jSchema.from_json("src/agents/iypchat/schema/neo4j-schema.json")
     entities = ["AS", "Prefix"]
     
-    # Entity resolution prompt
-    entity_prompt = create_entity_prompt(entity_examples)
-    print(entity_prompt)
+    # # Entity resolution prompt
+    # entity_prompt = create_entity_prompt(entity_examples)
+    # print(entity_prompt)
 
-    # Few shot prompt template dynamically loaded from CypherEval
-    cypher_template = create_cypher_template(schema, entities)
-    cypher_prompt = cypher_template.format(
-        schema=schema,
-        entities=entities,
-        topK=5,
-    )
-    print(cypher_prompt)
+    # # Few shot prompt template dynamically loaded from CypherEval
+    # cypher_template = create_cypher_template(schema, entities)
+    # cypher_prompt = cypher_template.format(
+    #     schema=schema,
+    #     entities=entities,
+    #     topK=5,
+    # )
+    # print(cypher_prompt)
     
     # Presenter prompt 
+    print("\nPresenter prompt")
     entity_prompt = create_presenter_prompt(presenter_examples, entities)
     print(entity_prompt)
     
