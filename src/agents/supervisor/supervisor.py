@@ -16,18 +16,21 @@ from src.agents.utils.states import (
     SplitThinkingAgentState,
     serialize_state,
 )
+from src.agents.utils.models import ModelParams
 
 METADATA_KEY_HANDOFF_DESTINATION = "__handoff_destination"
 METADATA_KEY_IS_HANDOFF_BACK = "__is_handoff_back"
 
-supervisor_prompt = """You are a supervisor managing two agents in order to reply to user messages:
+supervisor_prompt = """You are a supervisor managing two agents in order to reply to the last user message:
 - 'network_operator' agent, a network operator agent. Assign concrete actions like ping, traceroute, ip route show to this agent.
 - 'data_retriever', an Internet data retriever agent. Assign information-retrieval tasks to this agent, like retrieving AS names associated to IPs.
+
 
 Assign work to one agent at a time, do not call agents in parallel.
 Carefully plan the steps to resolve the user message and clearly separate each step so each agent is focused on a simple task.
 Do not do any work yourself except basic common sense tasks.
 After workflow execution always reply to the user original question (the user don't see the agents response so you need to forward it).
+
 
 Example workflow (for reference only):
 
@@ -82,7 +85,7 @@ def create_task_description_handoff_tool(
     return handoff_tool
 
 
-def get_supervisor_graph(debug=False, checkpointer=None) -> CompiledStateGraph:
+def get_supervisor_graph(debug=False, checkpointer=None, model_params=ModelParams()) -> CompiledStateGraph:
     """Return supervisor agent"""
     
     assign_to_data_retriever = create_task_description_handoff_tool(
@@ -96,8 +99,7 @@ def get_supervisor_graph(debug=False, checkpointer=None) -> CompiledStateGraph:
     supervisor_tools = [assign_to_data_retriever, assign_to_network_operator]
     
     llm = ChatOpenAI(
-        base_url="http://localhost:11434/v1", api_key="ollama", model_name="qwen3:4b"
-    ).bind_tools(supervisor_tools, parallel_tool_calls=False)
+        **model_params.model_dump()).bind_tools(supervisor_tools, parallel_tool_calls=False)
 
     def assistant(state: SplitThinkingAgentState):
         sysprompt = SystemMessage(supervisor_prompt)
@@ -119,8 +121,8 @@ def get_supervisor_graph(debug=False, checkpointer=None) -> CompiledStateGraph:
     builder.add_edge("tools", "assistant")
     supervisor_agent = builder.compile(debug=debug, name="supervisor_agent")
     
-    data_retriever = get_data_retriever_graph()
-    network_operator = get_network_operator_graph()
+    data_retriever = get_data_retriever_graph(model_params=model_params)
+    network_operator = get_network_operator_graph(model_params=model_params)
     
     def call_data_retriever(state: SplitThinkingAgentState):
         """wrapper for custom return values"""

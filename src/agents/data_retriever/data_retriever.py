@@ -9,6 +9,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from src.agents.utils.states import SplitThinkingAgentState, serialize_state
 from src.agents.iypchat.iypchat import get_iyp_graph
+from src.agents.utils.models import ModelParams
 
 
 @tool(parse_docstring=True)
@@ -63,10 +64,10 @@ def whois(resource: str) -> str:
     return f"<tool>{res}</tool>"
 
 
-def get_data_retriever_graph(debug=False) -> CompiledStateGraph:
+def get_data_retriever_graph(debug=False, model_params=ModelParams) -> CompiledStateGraph:
     "Return data_retriever react agent"
 
-    iyp_graph = get_iyp_graph()
+    iyp_graph = get_iyp_graph(model_params=model_params)
 
     @tool(parse_docstring=True)
     def call_iyp(prompt: str) -> str:
@@ -87,9 +88,7 @@ def get_data_retriever_graph(debug=False) -> CompiledStateGraph:
         # return response["messages"][-1]    
 
     data_tools = [call_iyp, whois]
-    data_llm = ChatOpenAI(
-        base_url="http://localhost:11434/v1", api_key="ollama", model_name="qwen3:4b"
-    ).bind_tools(data_tools)
+    data_llm = ChatOpenAI(**model_params.model_dump()).bind_tools(data_tools)
 
 
     def assistant(state: SplitThinkingAgentState):

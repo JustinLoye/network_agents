@@ -8,13 +8,14 @@ from langgraph.graph.state import CompiledStateGraph
 
 from src.agents.utils.states import SplitThinkingAgentState, serialize_state
 from src.agents.network_operator.tools import NETWORKING_TOOLS
+from src.agents.utils.models import ModelParams
 
-def get_network_operator_graph(debug=False) -> CompiledStateGraph:
+def get_network_operator_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph:
     """Return network_operator react agent"""
 
-    llm = ChatOpenAI(
-        base_url="http://localhost:11434/v1", api_key="ollama", model_name="qwen3:4b"
-    ).bind_tools(NETWORKING_TOOLS, parallel_tool_calls=False)
+    llm = ChatOpenAI(**model_params.model_dump()).bind_tools(
+        NETWORKING_TOOLS, parallel_tool_calls=False
+    )
 
 
     def assistant(state: SplitThinkingAgentState):

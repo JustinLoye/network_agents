@@ -7,9 +7,11 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import (
     HumanMessage,
 )
+from chainlit.input_widget import Select, Slider
+
 from src.agents.utils.states import serialize_state
-from src.agents.utils.states import remove_thoughts
 from src.agents.supervisor.supervisor import get_supervisor_graph
+from src.agents.utils.models import ModelParams
 
 # python -m chainlit run src/ui/app.py -w
 
@@ -71,6 +73,37 @@ async def set_starters():
 @cl.on_chat_start
 async def start_chat():
     cl.user_session.set("message_history", [])
+    checkpointer = InMemorySaver()
+    cl.user_session.set("agent", get_supervisor_graph(checkpointer=checkpointer))
+
+    settings = await cl.ChatSettings(
+        [
+            Select(
+                id="model",
+                label="Model",
+                values=["qwen3:4b", "qwen2.5-coder:3b", "llama3.2"],
+                initial_index=0,
+            ),
+            Slider(
+                id="temperature",
+                label="Temperature",
+                initial=0,
+                min=0,
+                max=2,
+                step=0.1,
+            ),
+        ]
+    ).send()
+
+
+@cl.on_settings_update
+async def setup_agent(settings):
+    checkpointer = InMemorySaver()
+    model_params = ModelParams(**settings)
+    cl.user_session.set(
+        "agent",
+        get_supervisor_graph(checkpointer=checkpointer, model_params=model_params),
+    )
 
 
 @cl.action_callback("show_tool")
@@ -94,8 +127,7 @@ async def on_message(msg: cl.Message):
 
     final_answer = cl.Message(content="")
 
-    checkpointer = InMemorySaver()
-    graph = get_supervisor_graph(checkpointer=checkpointer)
+    graph = cl.user_session.get("agent")
 
     for msg, metadata in graph.stream(
         {"messages": message_history},

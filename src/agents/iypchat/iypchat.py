@@ -14,6 +14,7 @@ from src.agents.iypchat.prompts.templates import (
 )
 from src.agents.iypchat.prompts.examples import entity_examples, presenter_examples
 from src.agents.utils.states import SplitThinkingAgentState, remove_thoughts, serialize_state
+from src.agents.utils.models import ModelParams
 
 
 
@@ -25,11 +26,9 @@ class GraphState(SplitThinkingAgentState):
     cypher_thoughts: str
     
     
-def get_iyp_graph(debug=False) -> CompiledStateGraph:
+def get_iyp_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph:
     """Return IYP graph agent"""
-    llm = ChatOpenAI(
-        base_url="http://localhost:11434/v1", api_key="ollama", model_name="qwen3:4b"
-    )
+    llm = ChatOpenAI(**model_params.model_dump())
 
     schema = Neo4jSchema.from_json("src/agents/iypchat/schema/neo4j-schema.json")
 
