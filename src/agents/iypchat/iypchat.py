@@ -26,7 +26,7 @@ class GraphState(SplitThinkingAgentState):
     cypher_thoughts: str
     
     
-def get_iyp_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph:
+def get_iyp_graph(debug=False, checkpointer=None, model_params=ModelParams()) -> CompiledStateGraph:
     """Return IYP graph agent"""
     llm = ChatOpenAI(**model_params.model_dump())
 
@@ -94,7 +94,7 @@ def get_iyp_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph
     builder.add_edge("entity_extractor", "iyp_assistant")
     builder.add_edge("iyp_assistant", "iyp_presenter")
     builder.add_edge("iyp_assistant", END)
-    iyp_graph = builder.compile(debug=True, name="iypchat")
+    iyp_graph = builder.compile(debug=True, checkpointer=checkpointer, name="iypchat")
     
     return iyp_graph
 

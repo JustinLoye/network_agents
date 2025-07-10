@@ -10,7 +10,11 @@ from langchain_core.messages import (
 from chainlit.input_widget import Select, Slider
 
 from src.agents.utils.states import serialize_state
+# TODO regroup the import in agents
 from src.agents.supervisor.supervisor import get_supervisor_graph
+from src.agents.network_operator.network_operator import get_network_operator_graph
+from src.agents.data_retriever.data_retriever import get_data_retriever_graph
+from src.agents.iypchat.iypchat import get_iyp_graph
 from src.agents.utils.models import ModelParams
 
 # python -m chainlit run src/ui/app.py -w
@@ -30,7 +34,7 @@ AS_dependency_start = """**Determine my ISP’s AS dependencies by following the
 1. Run a traceroute to identify my ISP’s IP address.
 2. Look up the AS number assigned to that IP.
 3. Retrieve that AS’s dependencies.
-4. Return a list of the resulting AS numbers, each annotated with its organization name and country.
+4. Return a list of the resulting AS numbers.
 """
 
 
@@ -69,6 +73,10 @@ async def set_starters():
         ),
     ]
 
+agents = {"Multi-Agent": get_supervisor_graph,
+          "Network Operator": get_network_operator_graph,
+          "Data Retriever": get_data_retriever_graph,
+          "IYP Chat": get_iyp_graph}
 
 @cl.on_chat_start
 async def start_chat():
@@ -78,6 +86,12 @@ async def start_chat():
 
     settings = await cl.ChatSettings(
         [
+            Select(
+                id="agent",
+                label="Agent",
+                values=list(agents.keys()),
+                initial_index=0,
+            ),
             Select(
                 id="model",
                 label="Model",
@@ -98,11 +112,13 @@ async def start_chat():
 
 @cl.on_settings_update
 async def setup_agent(settings):
+    print(f"Settings update: {settings}")
     checkpointer = InMemorySaver()
     model_params = ModelParams(**settings)
+    
     cl.user_session.set(
         "agent",
-        get_supervisor_graph(checkpointer=checkpointer, model_params=model_params),
+        agents[settings["agent"]](checkpointer=checkpointer, model_params=model_params),
     )
 
 

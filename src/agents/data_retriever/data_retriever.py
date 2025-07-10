@@ -64,7 +64,7 @@ def whois(resource: str) -> str:
     return f"<tool>{res}</tool>"
 
 
-def get_data_retriever_graph(debug=False, model_params=ModelParams) -> CompiledStateGraph:
+def get_data_retriever_graph(debug=False, checkpointer=None, model_params=ModelParams()) -> CompiledStateGraph:
     "Return data_retriever react agent"
 
     iyp_graph = get_iyp_graph(model_params=model_params)
@@ -116,7 +116,7 @@ Forward the user message to `call_iyp` without alteration"""
         tools_condition,
     )
     builder.add_edge("tools", "assistant")
-    react_graph = builder.compile(debug=True, name="data_retriever")
+    react_graph = builder.compile(debug=True, checkpointer=checkpointer, name="data_retriever")
     
     return react_graph
 

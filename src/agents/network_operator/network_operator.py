@@ -10,7 +10,7 @@ from src.agents.utils.states import SplitThinkingAgentState, serialize_state
 from src.agents.network_operator.tools import NETWORKING_TOOLS
 from src.agents.utils.models import ModelParams
 
-def get_network_operator_graph(debug=False, model_params=ModelParams()) -> CompiledStateGraph:
+def get_network_operator_graph(debug=False, checkpointer=None, model_params=ModelParams()) -> CompiledStateGraph:
     """Return network_operator react agent"""
 
     llm = ChatOpenAI(**model_params.model_dump()).bind_tools(
@@ -42,7 +42,7 @@ Reply to the user question only, no apologies and no follow-up questions"""
         tools_condition,
     )
     builder.add_edge("tools", "assistant")
-    react_graph = builder.compile(debug=debug, name="network_operator")
+    react_graph = builder.compile(debug=debug, checkpointer=checkpointer, name="network_operator")
     
     return react_graph
 
