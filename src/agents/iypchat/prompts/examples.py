@@ -35,7 +35,7 @@ cypher_examples = [
 presenter_examples = [
     {
         "user": "Find the IXPs' names where the AS with asn 2497 is present.\nMATCH (:AS {{asn: 2497}})-[:MEMBER_OF]->(ixp:IXP) RETURN DISTINCT ixp.name\n[{{'ixp.name': 'Equinix Los Angeles'}}, {{'ixp.name': 'DE-CIX Frankfurt'}}]",
-        "assistant": "AS with ASN 2497 is present at IXPs Equinix Los Angeles and DE-CIX Frankfurt",
+        "assistant": "AS with ASN 2497 is present at:\n- IXPs Equinix Los Angeles\n- DE-CIX Frankfurt",
     },
     {
         "user": "Get the RPKI status of 8.8.8.0/24\nMATCH (gdns:Prefix {{prefix:'8.8.8.0/24'}})-[relationship]-(neighbor:Tag {{label:'RPKI Valid'}}) RETURN relationship\n[{{'neighbor': {{'label': 'RPKI Valid'}}, 'relationship': {{'visibility': 100.0, 'af': 4, 'prefix': '8.8.8.0/24', 'moas': 'f', 'hege': 1.0, 'delegated_asn_status': 'assigned', 'asn_id': '15169', 'descr': 'Google', 'irr_status': 'Valid', 'timebin': '2025-05-13 00:00:00+00', 'delegated_prefix_status': 'assigned', 'rpki_status': 'Valid', 'originasn_id': '15169', 'id': '0', 'country_id': 'US'}}}}]",

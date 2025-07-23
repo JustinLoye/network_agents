@@ -58,7 +58,7 @@ async def set_starters():
         # ),
         cl.Starter(
             label="AS2497 IXP membership",
-            message="Get me the list of IXPs where AS2497 is present",
+            message="Get me the list of names of IXPs where AS2497 is present",
             icon="/public/knowledge-graph-data.svg",
         ),
         cl.Starter(
@@ -67,8 +67,8 @@ async def set_starters():
             icon="/public/collaboration.svg",
         ),
         cl.Starter(
-            label="AS dependencies of my ISP (hard)",
-            message="Determine my ISP's AS dependencies",
+            label="AS name and country of my ISP",
+            message="Determine the IP of my Internet service provider with a traceroute to Google and then retrieve me the associated AS name, AS number and country",
             icon="/public/collaboration.svg",
         ),
     ]
