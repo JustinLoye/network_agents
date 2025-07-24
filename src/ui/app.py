@@ -95,7 +95,7 @@ async def start_chat():
             Select(
                 id="model",
                 label="Model",
-                values=["qwen3:4b", "qwen2.5-coder:3b", "llama3.2"],
+                values=["qwen3:4b", "qwen2.5-coder:3b", "hf.co/unsloth/Qwen3-4B-GGUF:Q6_K_XL"],
                 initial_index=0,
             ),
             Slider(
@@ -133,7 +133,7 @@ async def on_tool(action):
 @cl.on_message
 async def on_message(msg: cl.Message):
     config = {"configurable": {"thread_id": cl.context.session.id}}
-    message_history = cl.user_session.get("message_history")
+    message_history = cl.user_session.get("message_history")  
     message_history.append(HumanMessage(content=msg.content))
 
     # Config setup
