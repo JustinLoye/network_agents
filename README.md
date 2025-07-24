@@ -57,4 +57,4 @@ A ReAct agent that delegates tasks to `data_retriever` and `network_operator`.
 
 **Demo:**
 
-Coming soon!
+![Chatbot demo](demo.gif)
